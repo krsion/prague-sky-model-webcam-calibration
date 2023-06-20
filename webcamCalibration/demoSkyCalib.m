@@ -8,6 +8,7 @@
 % Carnegie Mellon University
 % Do not distribute
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+addpath(genpath('.'))
 
 %% Setup paths
 imagesPath = './images';

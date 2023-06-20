@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    container_name: bakalarka
+    volumes:
+      - .:/usr/bakalarka
+    stdin_open: true
+    tty: true
+    command: python main.py
+    working_dir: /usr/bakalarka/src
+
+  bash:
+    build: .
+    container_name: bakalarka
+    volumes:
+      - .:/usr/bakalarka
+    stdin_open: true
+    tty: true
+    command: bash
+    working_dir: /usr/bakalarka/src

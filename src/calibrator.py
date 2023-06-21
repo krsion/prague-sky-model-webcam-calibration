@@ -3,12 +3,12 @@ import numpy as np
 from scipy.optimize import least_squares
 from utils import read_image_greyscale
 from sun_position_calculator import SunPositionCalculator
-from sky_models import PerezSkyModel, PragueSkyModel
+from sky_models import PerezAzimuthIndependentSkyModel, PerezSkyModel, PragueSkyModel
 
 
 class SingleCameraCalibrator:
 
-    def __init__(self, images_path: str, mask_filename: str, px_num: int) -> None:
+    def __init__(self, images_path: str, datetime_structure:bool, mask_filename: str, px_num: int, width: int = 720, height: int = 540) -> None:
         """Prepares data for calibration of given camera.
 
         Args:
@@ -16,9 +16,11 @@ class SingleCameraCalibrator:
             mask_filename (str): mask of the sky, sky is white, rest is black.
             px_num (int): number of random sky pixels in each image to be used for calibration
         """
-        self._prepare_data(images_path, mask_filename, px_num)
+        self.W = width
+        self.H = height
+        self._prepare_data(images_path, mask_filename, datetime_structure, px_num)
 
-    def focal_length_and_zenith(self, model: str, verbose=0, f0=2000, theta0: float = 3/8*np.pi, f_bounds=(10, 20000), theta_bounds=(0, np.pi/2), k_bounds=(-100, 100)) -> tuple[float, float]:
+    def focal_length_and_zenith(self, model: str, verbose=0, f0=500, theta0 : float=None, f_bounds=(10, 5_000), theta_bounds=(0, np.pi*5/8), k_bounds=(-1000, 1000)) -> tuple[float, float]:
         """Uses non-linear optimization to find focal length and zenith angle of the camera
 
         Args:
@@ -36,9 +38,18 @@ class SingleCameraCalibrator:
         Returns:
             tuple[float, float]: focal length and zenith angle of the camera
         """
-        if model not in ['psm', 'perez']:
-            raise ValueError("Model must be either 'psm' or 'perez'")
-        model = PerezSkyModel(1600, 1200) if model == 'perez' else PragueSkyModel()
+        if model not in ['psm', 'perez', 'perez-simple']:
+            raise ValueError("Model must be either 'psm', 'perez' or 'perez-simple'")
+        
+        if model == 'psm':
+            model = PragueSkyModel(self.W, self.H) 
+        elif model == 'perez':
+            model=PerezSkyModel(self.W, self.H)
+        elif model == 'perez-simple':
+            model=PerezAzimuthIndependentSkyModel(self.W, self.H)
+        
+        if theta0 is None:
+            theta0 = self.calc_theta0(f0)
 
         N_images = len(self.values)
 
@@ -52,6 +63,7 @@ class SingleCameraCalibrator:
             return np.array(residuals).flatten()
 
         x0 = np.array([f0, theta0, *[1]*N_images])
+        print(f0, np.deg2rad(theta0))
         bounds = ((f_bounds[0], theta_bounds[0], *[k_bounds[0]]*N_images),
                   (f_bounds[1], theta_bounds[1], *[k_bounds[1]]*N_images))
         result = least_squares(objective, x0, bounds=bounds, verbose=verbose)
@@ -59,30 +71,57 @@ class SingleCameraCalibrator:
         f, theta = result.x[0], result.x[1]*180/np.pi
         return f, theta
 
-    def _prepare_data(self, photos_path: str, mask_filename: str, px_num: int = 1000) -> None:
+    
+    def _prepare_data(self, photos_path: str, mask_filename: str, datetime_structure: bool,  px_num: int = 1000) -> None:
         """From each image in folder photos_path, randomly selects px_num pixels from the sky and stores their values, x and y coordinates. 
            Also stores sun azimuth and zenith for each image. Stores it in attributes self.values, self.xs, self.ys, self.sunAzimuths and self.sunZeniths.
         """
-        mask = read_image_greyscale(mask_filename)
-        self.values: list[np.ndarray[float]] = []
-        self.xs, self.ys, self.sunAzimuths, self.sunZeniths = [], [], [], []
-        sun_calc = SunPositionCalculator()
+        mask = read_image_greyscale(mask_filename, self.W, self.H)
+        self.set_y_max(mask)
+        self.values, self.xs, self.ys = [], [], []
+        
+        if datetime_structure:
+            self.sunAzimuths, self.sunZeniths = [], []
+            sun_calc = SunPositionCalculator()
 
-        for day in os.listdir(photos_path):
-            day_path = os.path.join(photos_path, day)
-            for filename in os.listdir(day_path):
+            for day in os.listdir(photos_path):
+                day_path = os.path.join(photos_path, day)
+                for filename in os.listdir(day_path):
+                    if not filename.endswith('.jpg'):
+                        continue
+                    file_path = os.path.join(day_path, filename)
+                    img = read_image_greyscale(file_path, self.W, self.H)
+                    
+                    truth, x, y = self._random_pixels(img, mask, px_num)
+                    self.values.append(truth)
+                    self.xs.append(x)
+                    self.ys.append(y)
+                    
+                    solar_info = sun_calc.sun_position(file_path)
+                    self.sunAzimuths.append(solar_info['sunAzimuth']/180*np.pi)
+                    self.sunZeniths.append(solar_info['sunZenith']/180*np.pi)
+        else:
+            for filename in os.listdir(photos_path):
                 if not filename.endswith('.jpg'):
                     continue
-                file_path = os.path.join(day_path, filename)
-                img = read_image_greyscale(file_path)
+                file_path = os.path.join(photos_path, filename)
+                img = read_image_greyscale(file_path, self.W, self.H)
+                
                 truth, x, y = self._random_pixels(img, mask, px_num)
                 self.values.append(truth)
                 self.xs.append(x)
                 self.ys.append(y)
-                solar_info = sun_calc.sun_position(file_path)
-                self.sunAzimuths.append(solar_info['sunAzimuth']/180*np.pi)
-                self.sunZeniths.append(solar_info['sunZenith']/180*np.pi)
+                
 
+    def set_y_max(self, mask):
+        y_sky, _ = (mask == 255).nonzero()
+        self.y_max = y_sky.max()
+        
+        
+    def calc_theta0(self, f0):
+        v_min = 600-self.y_max
+        return np.pi/2 + np.arctan2(v_min, f0)
+    
     def _random_pixels(self, img: np.ndarray, mask: np.ndarray, px_num: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Randomly selects given number of pixels from image that fit the mask.
 

@@ -1,4 +1,4 @@
-from optimize import focal_length_and_zenith, focal_length_and_zenith_on_dataset
+from calibrator import focal_length_and_zenith, focal_length_and_zenith_on_dataset
 import json
 import numpy as np
 

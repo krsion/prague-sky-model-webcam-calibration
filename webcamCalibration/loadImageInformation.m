@@ -47,7 +47,7 @@ else
 end
 
 % correct for non-linearities
-img = correctImage(origImg, invCamResponse);
+img = origImg; %correctImage(origImg, invCamResponse);
 
 if luminanceOnly
     img = rgb2gray(img);

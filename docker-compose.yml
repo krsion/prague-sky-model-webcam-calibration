@@ -16,14 +16,14 @@ services:
                python main.py --photos ../data/images  --masks ../data/sky-masks -n 1000 --sky-model perez-simple --solar -o result-perez-simple-solar.json"
     working_dir: /usr/bakalarka/src
 
-  lalondes-demo:
+  calibration-demo:
     build: .
     container_name: bakalarka
     volumes:
       - .:/usr/bakalarka
     stdin_open: true
     tty: true
-    command: python lalondes_demo.py
+    command: python calibration.py
     working_dir: /usr/bakalarka/src
 
   bash:

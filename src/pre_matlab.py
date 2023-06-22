@@ -1,8 +1,11 @@
 import os
 import shutil
+from PIL import Image
 
 PATHIN = '../data/images'
 PATHOUT = '../data/images-matlab'
+
+W, H = 720, 540
 
 if os.path.exists(PATHOUT):
     shutil.rmtree(PATHOUT)
@@ -17,5 +20,5 @@ for location in os.listdir(PATHIN):
             if file.endswith('.jpg'):
                 filepathin = f'{PATHIN}/{location}/{day}/{file}'
                 filepathout = os.path.join(PATHOUT, location, str(i) + '.jpg')
-                shutil.copy(filepathin, filepathout)
+                Image.open(filepathin).resize((W, H)).save(filepathout)
                 i += 1

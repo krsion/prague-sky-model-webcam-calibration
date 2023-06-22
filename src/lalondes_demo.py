@@ -2,7 +2,7 @@ import os
 import h5py
 import numpy as np
 from scipy.optimize import least_squares
-from utils import read_image_greyscale
+from utils import read_image_greyscale, iterable_argument_cache
 from sky_models import PerezAzimuthIndependentSkyModel, PerezSkyModel
 from sun_position_calculator import SunPositionCalculator
 
@@ -80,6 +80,7 @@ class ArizonaCalibration:
         mat_file = h5py.File(solar_path, 'r')            
         return mat_file['sunAzimuth'][0][0], mat_file['sunZenith'][0][0]
 
+    @iterable_argument_cache
     def process_images(self, image_paths):
         truth, xs, ys, sun_phis, sun_thetas = [], [], [], [], []
         

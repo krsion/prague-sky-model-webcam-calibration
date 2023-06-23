@@ -4,10 +4,14 @@ import json
 from pysolar.solar import get_altitude, get_azimuth
 import numpy as np
 import datetime
+import warnings
+
+
 
 
 class SunPositionCalculator:
     def __init__(self):
+        warnings.filterwarnings("ignore", category=UserWarning, message="I don't know about leap seconds after 2021")
         self.webcam_positions = self._webcams()
 
     def _webcams(self):
@@ -36,6 +40,7 @@ class SunPositionCalculator:
         hour = int(parts[-1][:2])
         minute = int(parts[-1][2:4])
         return location, year, month, day, hour, minute
+
 
     def sun_position(self, filename):
         location, year, month, day, hour, minute = self._parse_filepath(filename)

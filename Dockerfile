@@ -4,9 +4,5 @@ RUN pip3 install numpy scipy Pillow matplotlib pytz timezonefinder pysolar openc
 
 WORKDIR /usr/bakalarka
 
-COPY ./data/images ./data/images
-COPY ./data/sky-masks ./data/sky-masks
-
+COPY ./data ./data
 COPY ./src ./src
-
-

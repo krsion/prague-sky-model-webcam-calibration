@@ -2,40 +2,32 @@ import argparse
 import json
 import os
 import numpy as np
-from calibrator import SingleCameraCalibrator
-from sky_models import PragueSkyModel, PerezSkyModel, PerezAzimuthIndependentSkyModel
+from calibration import ArizonaCalibration, CHMUCalibration
 
-
-parser = argparse.ArgumentParser(
-    description='Lalonde camera calibration of zenith degree and focal length using Prague Sky Model or Perez Sky Model')
-parser.add_argument('-p', '--photos', default='../data/images', type=str,
-                    help='Folder containing clear sky photos with structure like \
-                    PHOTOS/[location]/[yyyymmdd]/[HHMM].jpg (default: %(default)s)')
-parser.add_argument('-m', '--masks', default='../data/sky-masks', type=str,
-                    help='Folder containing sky masks named [location].jpg (default: %(default)s)')
-parser.add_argument('-s', '--sky-model', default='psm', type=str, choices=['psm', 'perez', 'perez-simple'],
-                    help='Sky model to be used. (default: %(default)s)')
-parser.add_argument('-o', '--output', type=str,
-                    help='File path to output results in json format. (default: stdout)')
-parser.add_argument('-n', '--px-num', default=1000, type=int,
-                    help='Number of pixels in each image to be used for calibration. (default: %(default)s)')
-parser.add_argument('--solar', action='store_true', help='Use solar zenith angle for optimization', default=False)
+parser = argparse.ArgumentParser(description="Lalonde's camera calibration of zenith, azimuth and focal length.")
+parser.add_argument('-I', type=str, help='Path to folder containing dataset I used for calibration of focal length and zenith degree.')
+parser.add_argument('-J', type=str, help='Path to folder containing dataset J used for calibration of azimuth degree.')
+parser.add_argument('-m', '--mask', type=str, help='Path to sky mask image.')
+parser.add_argument('-n', '--px-num', type=int, help='Number of pixels in each image to be used for calibration.')
+parser.add_argument('-W', type=int, help='Width of images in dataset. Will be resized to this value.')
+parser.add_argument('-H', type=int, help='Height of images in dataset. Will be resized to this value.')
+parser.add_argument('-f0', type=float, help='Initial guess of focal length.')
+parser.add_argument('-df', '--dataset-format', type=str, choices=['date-time', 'matlab-flat'], help='Format of dataset folder.')
 
 if __name__ == '__main__':
-    W, H = 720, 540
     args = parser.parse_args()
-    print('ARGS', args)
-    
-    model = None
-    if args.sky_model == 'psm':
-        model = PragueSkyModel(W, H) 
-    elif args.sky_model == 'perez':
-        model = PerezSkyModel(W, H)
+    print('args:', args)
+    np.random.seed(0)    
+    if args.dataset_format == 'date-time':
+        CHMUCalibration(args.mask, args.W, args.H, args.px_num).demo(args.I, args.J, args.f0)
     else:
-        model = PerezAzimuthIndependentSkyModel(W, H)
+        ArizonaCalibration(args.mask, args.W, args.H, args.px_num).demo(args.I, args.J, args.f0)
     
     
-    results = {}
+    
+    
+    
+    '''results = {}
     for location in os.listdir(args.photos):
         location_path = os.path.join(args.photos, location)
         mask_path = os.path.join(args.masks, location + '.jpg')
@@ -53,3 +45,4 @@ if __name__ == '__main__':
             json.dump(results, file)
     else:
         print(results)
+    '''

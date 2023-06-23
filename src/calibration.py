@@ -18,7 +18,7 @@ class ArizonaCalibration:
                 
     def demo(self, I_path, J_path, f0):
         f, theta_c = self.find_f_theta(I_path, f0)
-        print('f:', f, 'theta:', np.rad2deg(theta_c))
+        print(f'f: {f}, theta: {np.rad2deg(theta_c)}', end=', ')
         
         costs, phis = [], []
         for phi0 in np.arange(0, 2*np.pi, np.pi/2):

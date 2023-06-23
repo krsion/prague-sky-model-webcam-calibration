@@ -1,21 +1,16 @@
-folder_path = '../data/images-matlab';
 
-% List subfolders in specified folder (excluding '.' and '..')
-subfolders = dir(fullfile(folder_path, '*'));
-subfolders = subfolders([subfolders(:).isdir] & ~ismember({subfolders(:).name},{'.','..'}));
+locations = {'brno', 'ceske_budejovice', 'dukovany', 'holesov', 'nedvezi', 'olomouc', 'polom', 'pribyslav', 'primda', 'temelin'};
 
-% Loop through each subfolder and run the function
 fprintf("{\n")
-for i = 1:length(subfolders)
-    location = subfolders(i).name;
-    
-    % Apply function and save results
-    [focalLength, zenithAngle] = demoSkyCalib(location);
-    fprintf('    "%s": {"focalLength": %f, "zenithAngle": %f}', location, focalLength, zenithAngle*180/pi)
-    if i < length(subfolders)
-        fprintf(",\n")
-    end
-    %fprintf('%s\n',fullfile(folder_path, location, 'results.mat'))
-    %save(fullfile(folder_path, location, 'results.mat'), 'focalLength', 'zenithAngle');
+for i = 1:length(locations)
+    location = locations{i};
+
+    imagesPath = '../data-matlab';
+    gradientPath = strcat('I/', location);
+    clearDayPath = strcat('J/', location);
+    skyMaskPath = strcat('../data-matlab/sky-masks/', location, '.jpg');
+
+    [focalLength, zenithAngle, azimuthAngle] = calibrate(imagesPath, gradientPath, clearDayPath, skyMaskPath);
+    fprintf('%s: Estimated focal length: %.2f px, zenith angle: %.2f deg, azimuth angle: %.2f deg\n', location, focalLength, zenithAngle*180/pi, azimuthAngle*180/pi);
 end
 fprintf("\n}\n")

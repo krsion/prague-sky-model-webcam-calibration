@@ -1,6 +1,6 @@
 version: "3.8"
 services:
-  chmu-all:
+  arizona:
     build: .
     container_name: bakalarka
     volumes:
@@ -8,24 +8,48 @@ services:
     stdin_open: true
     tty: true
     command: >
-      bash -c "python main.py --photos ../data/images  --masks ../data/sky-masks -n 1000 --sky-model perez -o result-perez-nosolar.json
-               python main.py --photos ../data/images  --masks ../data/sky-masks -n 1000 --sky-model psm -o result-psm-nosolar.json
-               python main.py --photos ../data/images  --masks ../data/sky-masks -n 1000 --sky-model perez-simple -o result-perez-simple-nosolar.json
-               python main.py --photos ../data/images  --masks ../data/sky-masks -n 1000 --sky-model perez  --solar -o result-perez-solar.json
-               python main.py --photos ../data/images  --masks ../data/sky-masks -n 1000 --sky-model psm --solar -o result-psm-solar.json
-               python main.py --photos ../data/images  --masks ../data/sky-masks -n 1000 --sky-model perez-simple --solar -o result-perez-simple-solar.json"
+      python main.py 
+        -I ../webcamCalibration/images/gradient 
+        -J ../webcamCalibration/images/clearDay 
+        -m ../webcamCalibration/skyMask/mask.jpg 
+        -n 1000 -W 720 -H 540 -f0 500 
+        -df matlab-flat
     working_dir: /usr/bakalarka/src
 
-  calibration-demo:
+  # DONE
+  # python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/ceske_budejovice -J ../data/J/ceske_budejovice -m ../data/sky-masks/ceske_budejovice.jpg >> chmu-log.txt
+  # python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/dukovany -J ../data/J/dukovany -m ../data/sky-masks/dukovany.jpg >> chmu-log.txt
+  # python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/holesov -J ../data/J/holesov -m ../data/sky-masks/holesov.jpg >> chmu-log.txt
+  # python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/olomouc -J ../data/J/olomouc -m ../data/sky-masks/olomouc.jpg >> chmu-log.txt
+  # python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/pribyslav -J ../data/J/pribyslav -m ../data/sky-masks/pribyslav.jpg >> chmu-log.txt
+  # python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/polom -J ../data/J/polom -m ../data/sky-masks/polom.jpg >> chmu-log.txt
+  # python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/primda -J ../data/J/primda -m ../data/sky-masks/primda.jpg >> chmu-log.txt
+  # python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/temelin -J ../data/J/temelin -m ../data/sky-masks/temelin.jpg >> chmu-log.txt
+  # python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/brno -J ../data/J/brno -m ../data/sky-masks/brno.jpg >> chmu-log.txt
+  # python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/nedvezi -J ../data/J/nedvezi -m ../data/sky-masks/nedvezi.jpg >> chmu-log.txt
+
+
+  chmu:
     build: .
     container_name: bakalarka
     volumes:
       - .:/usr/bakalarka
     stdin_open: true
     tty: true
-    command: python calibration.py
+    command: >
+      bash -c "
+        python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/ceske_budejovice -J ../data/J/ceske_budejovice -m ../data/sky-masks/ceske_budejovice.jpg >> chmu-log.txt
+        python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/dukovany -J ../data/J/dukovany -m ../data/sky-masks/dukovany.jpg >> chmu-log.txt
+        python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/holesov -J ../data/J/holesov -m ../data/sky-masks/holesov.jpg >> chmu-log.txt
+        python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/olomouc -J ../data/J/olomouc -m ../data/sky-masks/olomouc.jpg >> chmu-log.txt
+        python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/pribyslav -J ../data/J/pribyslav -m ../data/sky-masks/pribyslav.jpg >> chmu-log.txt
+        python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/polom -J ../data/J/polom -m ../data/sky-masks/polom.jpg >> chmu-log.txt
+        python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/primda -J ../data/J/primda -m ../data/sky-masks/primda.jpg >> chmu-log.txt
+        python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/temelin -J ../data/J/temelin -m ../data/sky-masks/temelin.jpg >> chmu-log.txt
+        python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/brno -J ../data/J/brno -m ../data/sky-masks/brno.jpg >> chmu-log.txt
+        python main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/nedvezi -J ../data/J/nedvezi -m ../data/sky-masks/nedvezi.jpg >> chmu-log.txt
+      "
     working_dir: /usr/bakalarka/src
-
   bash:
     build: .
     container_name: bakalarka

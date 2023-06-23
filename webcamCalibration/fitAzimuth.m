@@ -49,9 +49,7 @@ xOpt = zeros(length(phiRange), length(x0));
 minValue = zeros(length(phiRange), 1);
 for k = 1:length(phiRange)
     phi0 = phiRange(k);
-    
-    fprintf('Optimizing for phi0 = %.2f...', phi0);
-    
+        
     % Levenberg-Marquadt non-linear least-squares
     options = optimset('Display', 'off', 'Jacobian', 'off');
    

@@ -1,6 +1,7 @@
 from sky_image_generator import batch_luminance
 
 import numpy as np
+import warnings
 from coordinates import CoordinateConvertor
 
 
@@ -73,6 +74,7 @@ class PerezAzimuthIndependentSkyModel(SkyModel):
         super().__init__(W, H)
 
     def model_raw(self, theta):
+        warnings.filterwarnings("ignore", category=RuntimeWarning, message='overflow encountered in exp')
         return np.nan_to_num(1 - np.exp(-0.32/np.cos(theta)), nan=0, posinf=1000, neginf=-1000)
     
     

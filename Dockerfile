@@ -4,5 +4,4 @@ RUN pip3 install numpy scipy Pillow matplotlib pytz timezonefinder pysolar openc
 
 WORKDIR /usr/bakalarka
 
-COPY ./data ./data
-COPY ./src ./src
+COPY . .

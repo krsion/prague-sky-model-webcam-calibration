@@ -64,6 +64,8 @@ class PerezSkyModel(SkyModel):
 
     def model_raw(self, theta, gamma):
         a, b, c, d, e = -1, -0.32, 10, -3, 0.45
+        warnings.filterwarnings("ignore", category=RuntimeWarning, message='overflow encountered in exp')
+
         l_p = (1 + a * np.exp(b / np.cos(theta))) * \
             (1 + c * np.exp(d * gamma) + e * np.cos(gamma)**2)
         return np.nan_to_num(l_p, nan=0, posinf=1000, neginf=-1000)

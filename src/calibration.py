@@ -6,8 +6,6 @@ from utils import read_image_greyscale, iterable_argument_cache
 from sky_models import PerezAzimuthIndependentSkyModel, PerezSkyModel
 from sun_position_calculator import SunPositionCalculator
 
-
-
 class ArizonaCalibration:
     def __init__(self, mask_path, W, H, px_num):
         mask = read_image_greyscale(mask_path, W, H)
@@ -16,13 +14,13 @@ class ArizonaCalibration:
         self.H = H
         self.px_num = px_num
                 
-    def demo(self, I_path, J_path, f0):
-        f, theta_c = self.find_f_theta(I_path, f0)
+    def demo(self, I_path, J_path, f0, I_model, J_model):
+        f, theta_c = self.find_f_theta(I_path, f0, I_model)
         print(f'f: {f}, theta: {np.rad2deg(theta_c)}', end=', ')
         
         costs, phis = [], []
         for phi0 in np.arange(0, 2*np.pi, np.pi/2):
-            phi_c, cost = self.find_phi(J_path, phi0, theta_c, f)
+            phi_c, cost = self.find_phi(J_path, phi0, theta_c, f, J_model)
             phis.append(phi_c)
             costs.append(cost)
         
@@ -30,8 +28,7 @@ class ArizonaCalibration:
         print('phi:', np.rad2deg(phi))
 
 
-    def find_f_theta(self, images_path, f0):
-        model = PerezAzimuthIndependentSkyModel(self.W, self.H)
+    def find_f_theta(self, images_path, f0, model):
         truth, xs, ys, _, _ = self.process_images(self.get_image_paths(images_path))
         theta0 = np.pi/2 + np.arctan2(self.H/2-np.max(self.y_sky), f0)
         x0 = np.array([f0, theta0, *[1]*len(truth)])
@@ -40,8 +37,7 @@ class ArizonaCalibration:
         return f, theta
 
 
-    def find_phi(self, images_path, phi0, theta_c, f):
-        model = PerezSkyModel(self.W, self.H)
+    def find_phi(self, images_path, phi0, theta_c, f, model):
         truth, xs, ys, sun_phis, sun_thetas = self.process_images(self.get_image_paths(images_path))
         x0 = np.array([phi0, *[1]*len(truth)])
         result = least_squares(self.objective_phi, x0, method='lm', args=(model, truth, xs, ys, theta_c, f, sun_thetas, sun_phis))

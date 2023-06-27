@@ -1,0 +1,16 @@
+args: Namespace(I='../data/I/ceske_budejovice', J='../data/J/ceske_budejovice', mask='../data/sky-masks/ceske_budejovice.jpg', px_num=1000, W=720, H=540, f0=500.0, dataset_format='date-time', model_J='prague')
+f: 1344.7489083157948, theta: 80.69964772748347, phi: 190.15137975144216
+args: Namespace(I='../data/I/dukovany', J='../data/J/dukovany', mask='../data/sky-masks/dukovany.jpg', px_num=1000, W=720, H=540, f0=500.0, dataset_format='date-time', model_J='prague')
+f: 1029.801165563849, theta: 87.2739081793395, phi: 223.9756214652737
+args: Namespace(I='../data/I/holesov', J='../data/J/holesov', mask='../data/sky-masks/holesov.jpg', px_num=1000, W=720, H=540, f0=500.0, dataset_format='date-time', model_J='prague')
+f: 1372.749433461152, theta: 80.18690783707505, phi: 14.807075794118155
+args: Namespace(I='../data/I/olomouc', J='../data/J/olomouc', mask='../data/sky-masks/olomouc.jpg', px_num=1000, W=720, H=540, f0=500.0, dataset_format='date-time', model_J='prague')
+f: 1825.4008335617307, theta: 82.34680055148272, phi: 72.97008140280808
+args: Namespace(I='../data/I/pribyslav', J='../data/J/pribyslav', mask='../data/sky-masks/pribyslav.jpg', px_num=1000, W=720, H=540, f0=500.0, dataset_format='date-time', model_J='prague')
+f: 1165.867858504662, theta: 79.72368332064089, phi: 182.28126388894137
+args: Namespace(I='../data/I/polom', J='../data/J/polom', mask='../data/sky-masks/polom.jpg', px_num=1000, W=720, H=540, f0=500.0, dataset_format='date-time', model_J='prague')
+f: 928.7761002832511, theta: 86.79419308843185, phi: 255.44875782555178
+args: Namespace(I='../data/I/primda', J='../data/J/primda', mask='../data/sky-masks/primda.jpg', px_num=1000, W=720, H=540, f0=500.0, dataset_format='date-time', model_J='prague')
+f: 794.2366199572385, theta: 87.47629204186883, phi: 193.43432693543508
+args: Namespace(I='../data/I/temelin', J='../data/J/temelin', mask='../data/sky-masks/temelin.jpg', px_num=1000, W=720, H=540, f0=500.0, dataset_format='date-time', model_J='prague')
+f: 2009.129569990204, theta: 86.04234042685988, phi: 12.679855286317796

@@ -32,7 +32,7 @@ services:
         -mJ prague
     working_dir: /usr/bakalarka/src
 
-  chmu:
+  chmu-perez:
     build: .
     volumes:
       - .:/usr/bakalarka
@@ -40,18 +40,40 @@ services:
     tty: true
     command: >
       bash -c "
-        python3 main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/ceske_budejovice -J ../data/J/ceske_budejovice -m ../data/sky-masks/ceske_budejovice.jpg >> chmu-log.txt
-        python3 main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/dukovany -J ../data/J/dukovany -m ../data/sky-masks/dukovany.jpg >> chmu-log.txt
-        python3 main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/holesov -J ../data/J/holesov -m ../data/sky-masks/holesov.jpg >> chmu-log.txt
-        python3 main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/olomouc -J ../data/J/olomouc -m ../data/sky-masks/olomouc.jpg >> chmu-log.txt
-        python3 main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/pribyslav -J ../data/J/pribyslav -m ../data/sky-masks/pribyslav.jpg >> chmu-log.txt
-        python3 main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/polom -J ../data/J/polom -m ../data/sky-masks/polom.jpg >> chmu-log.txt
-        python3 main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/primda -J ../data/J/primda -m ../data/sky-masks/primda.jpg >> chmu-log.txt
-        python3 main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/temelin -J ../data/J/temelin -m ../data/sky-masks/temelin.jpg >> chmu-log.txt
-        python3 main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/brno -J ../data/J/brno -m ../data/sky-masks/brno.jpg >> chmu-log.txt
-        python3 main.py -n 1000 -W 720 -H 540 -f0 500 -df date-time -I ../data/I/nedvezi -J ../data/J/nedvezi -m ../data/sky-masks/nedvezi.jpg >> chmu-log.txt
+        ./chmucalib.sh ceske_budejovice perez >> chmu-perez-log.txt
+        ./chmucalib.sh dukovany perez >> chmu-perez-log.txt
+        ./chmucalib.sh holesov perez >> chmu-perez-log.txt
+        ./chmucalib.sh olomouc perez >> chmu-perez-log.txt
+        ./chmucalib.sh pribyslav perez >> chmu-perez-log.txt
+        ./chmucalib.sh polom perez >> chmu-perez-log.txt
+        ./chmucalib.sh primda perez >> chmu-perez-log.txt
+        ./chmucalib.sh temelin perez >> chmu-perez-log.txt
+        ./chmucalib.sh brno perez >> chmu-perez-log.txt
+        ./chmucalib.sh nedvezi perez >> chmu-perez-log.txt
       "
     working_dir: /usr/bakalarka/src
+
+  chmu-prague:
+    build: .
+    volumes:
+      - .:/usr/bakalarka
+    stdin_open: true
+    tty: true
+    command: >
+      bash -c "
+        ./chmucalib.sh ceske_budejovice prague >> chmu-prague-log.txt
+        ./chmucalib.sh dukovany prague >> chmu-prague-log.txt
+        ./chmucalib.sh holesov prague >> chmu-prague-log.txt
+        ./chmucalib.sh olomouc prague >> chmu-prague-log.txt
+        ./chmucalib.sh pribyslav prague >> chmu-prague-log.txt
+        ./chmucalib.sh polom prague >> chmu-prague-log.txt
+        ./chmucalib.sh primda prague >> chmu-prague-log.txt
+        ./chmucalib.sh temelin prague >> chmu-prague-log.txt
+        ./chmucalib.sh brno prague >> chmu-prague-log.txt
+        ./chmucalib.sh nedvezi prague >> chmu-prague-log.txt
+      "
+    working_dir: /usr/bakalarka/src
+
   bash:
     build: .
     container_name: bakalarka

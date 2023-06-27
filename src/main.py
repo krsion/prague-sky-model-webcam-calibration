@@ -1,4 +1,5 @@
 import argparse
+import json
 import numpy as np
 from calibration import ArizonaCalibration, CHMUCalibration
 from sky_models import PerezSkyModel, PerezAzimuthIndependentSkyModel, PragueSkyModel
@@ -16,14 +17,16 @@ parser.add_argument('-mJ', '--model-J', choices=['perez', 'prague'], help='Sky m
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    print('args:', args)
-    np.random.seed(0)    
+    np.random.seed(0)
     
     I_model = PerezAzimuthIndependentSkyModel(args.W, args.H)
     J_model = PragueSkyModel(args.W, args.H) if args.model_J == 'prague' else PerezSkyModel(args.W, args.H)
     
     if args.dataset_format == 'date-time':
-        CHMUCalibration(args.mask, args.W, args.H, args.px_num).demo(args.I, args.J, args.f0, I_model, J_model)
+        results = CHMUCalibration(args.mask, args.W, args.H, args.px_num).demo(args.I, args.J, args.f0, I_model, J_model)
+        results['args'] = vars(args)
+        print(json.dumps(results))
     else: # matlab-flat
-        ArizonaCalibration(args.mask, args.W, args.H, args.px_num).demo(args.I, args.J, args.f0, I_model, J_model)
-    
+        results = ArizonaCalibration(args.mask, args.W, args.H, args.px_num).demo(args.I, args.J, args.f0, I_model, J_model)
+        results['args'] = vars(args)
+        print(json.dumps(results))

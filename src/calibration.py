@@ -16,8 +16,6 @@ class ArizonaCalibration:
                 
     def demo(self, I_path, J_path, f0, I_model, J_model):
         f, theta_c = self.find_f_theta(I_path, f0, I_model)
-        print(f'f: {f}, theta: {np.rad2deg(theta_c)}', end=', ')
-        
         costs, phis = [], []
         for phi0 in np.arange(0, 2*np.pi, np.pi/2):
             phi_c, cost = self.find_phi(J_path, phi0, theta_c, f, J_model)
@@ -25,7 +23,7 @@ class ArizonaCalibration:
             costs.append(cost)
         
         phi = phis[np.argmin(costs)]
-        print('phi:', np.rad2deg(phi))
+        return {'f':f, 'theta':np.rad2deg(theta_c) % 360, 'phi':np.rad2deg(phi) % 360}
 
 
     def find_f_theta(self, images_path, f0, model):

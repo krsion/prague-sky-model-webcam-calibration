@@ -13,7 +13,7 @@ class CoordinateConvertor:
     - (x, y, z) - 3D cartesian coordinates, origin in the center of the image
     """
 
-    def __init__(self, W=1600, H=1200) -> None:
+    def __init__(self, W, H) -> None:
         self.W = W
         self.H = H
 

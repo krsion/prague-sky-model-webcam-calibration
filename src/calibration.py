@@ -208,7 +208,7 @@ class CHMUCalibration(ArizonaCalibration):
             H (int): Height of images
             px_num (int): Number of pixels used for calibration
         """
-        self.solar_calc = SunPositionCalculator()
+        self.solar_calc = SunPositionCalculator('../data/webcams.json')
         super().__init__(mask_path, W, H, px_num)
         
     def load_solar(self, image_path):
@@ -221,7 +221,7 @@ class CHMUCalibration(ArizonaCalibration):
             _type_: _description_
         """
         x = self.solar_calc.sun_position(image_path)
-        return np.deg2rad(x['sunAzimuth']), np.deg2rad(x['sunZenith'])
+        return x['sunAzimuth'], x['sunZenith']
     
     def get_image_paths(self, directory):
         """Overriden method from ArizonaCalibration. Iterates over image paths in directory tree.

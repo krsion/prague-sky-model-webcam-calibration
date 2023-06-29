@@ -1,17 +1,18 @@
 from sky_image_generator import batch_luminance
-
+from abc import ABC, abstractmethod
 import numpy as np
 import warnings
 from coordinates import CoordinateConvertor
 
 
-class SkyModel:
+class SkyModel(ABC):
     def __init__(self, W, H) -> None:
         self.convertor = CoordinateConvertor(W, H)
         self.default_camera_azimuth = 0
         self.default_sun_azimuth = np.deg2rad(120)
         self.default_sun_zenith = np.deg2rad(80)
 
+    @abstractmethod
     def model_raw(self, theta, gamma):
         ...
 

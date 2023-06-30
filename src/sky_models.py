@@ -6,17 +6,17 @@ from coordinates import CoordinateConvertor
 
 
 class SkyModel(ABC):
-    def __init__(self, W, H) -> None:
+    def __init__(self, W:int, H:int) -> None:
         self.convertor = CoordinateConvertor(W, H)
         self.default_camera_azimuth = 0
         self.default_sun_azimuth = np.deg2rad(120)
         self.default_sun_zenith = np.deg2rad(80)
 
     @abstractmethod
-    def model_raw(self, theta, gamma):
+    def model_raw(self, theta:np.ndarray, gamma:np.ndarray) -> np.ndarray:
         ...
 
-    def model(self, camera_azimuth, camera_zenith, f, sun_azimuth, sun_zenith, x, y):
+    def model(self, camera_azimuth:float, camera_zenith:float, f:float, sun_azimuth:float, sun_zenith:float, x:np.ndarray, y:np.ndarray) -> np.ndarray:
         if sun_azimuth is None:
             sun_azimuth = self.default_sun_azimuth
         if sun_zenith is None:
@@ -28,7 +28,7 @@ class SkyModel(ABC):
             x, y, camera_azimuth, camera_zenith, f, sun_azimuth, sun_zenith)
         return self.model_raw(theta, gamma)
     
-    def generate_image(self, camera_azimuth, camera_zenith, f, sun_azimuth, sun_zenith):
+    def generate_image(self, camera_azimuth:float, camera_zenith:float, f:float, sun_azimuth:float, sun_zenith:float) -> np.ndarray:
         x, y = np.ones([self.convertor.W, self.convertor.H]).nonzero()
         r = self.model(camera_azimuth, camera_zenith, f, sun_azimuth, sun_zenith, x, y)
         if len(r.shape) == 1:
@@ -42,16 +42,16 @@ class SkyModel(ABC):
             
 
 class PragueSkyModel(SkyModel):
-    def __init__(self, W=1600, H=1200, ground_albedo=0.00595418177, visibility=100.012133) -> None:
+    def __init__(self, W:int, H:int, ground_albedo:float=0.00595418177, visibility:float=100.012133) -> None:
         super().__init__(W, H)
         self.sun_elevation = np.pi/4
         self.albedo = ground_albedo
         self.visibility = visibility
 
-    def model_raw(self, theta, gamma):
+    def model_raw(self, theta:np.ndarray, gamma:np.ndarray) -> np.ndarray:
         return batch_luminance(self.sun_elevation, self.visibility, self.albedo, theta, gamma)
 
-    def model(self, camera_azimuth, camera_zenith, f, sun_azimuth, sun_zenith, x, y):
+    def model(self, camera_azimuth:float, camera_zenith:float, f:float, sun_azimuth:float, sun_zenith:float, x:np.ndarray, y:np.ndarray) -> np.ndarray:
         if sun_zenith is None:
             sun_zenith = self.default_sun_zenith
         self.sun_elevation = np.pi/2 - sun_zenith
@@ -60,10 +60,10 @@ class PragueSkyModel(SkyModel):
 
 
 class PerezSkyModel(SkyModel):
-    def __init__(self, W, H) -> None:
+    def __init__(self, W:int, H:int) -> None:
         super().__init__(W, H)
 
-    def model_raw(self, theta, gamma):
+    def model_raw(self, theta:np.ndarray, gamma:np.ndarray) -> np.ndarray:
         a, b, c, d, e = -1, -0.32, 10, -3, 0.45
         warnings.filterwarnings("ignore", category=RuntimeWarning, message='overflow encountered in exp')
 
@@ -76,18 +76,18 @@ class PerezAzimuthIndependentSkyModel(SkyModel):
     def __init__(self, W, H) -> None:
         super().__init__(W, H)
 
-    def model_raw(self, theta):
+    def model_raw(self, theta:np.ndarray) -> np.ndarray:
         warnings.filterwarnings("ignore", category=RuntimeWarning, message='overflow encountered in exp')
         return np.nan_to_num(1 - np.exp(-0.32/np.cos(theta)), nan=0, posinf=1000, neginf=-1000)
     
     
-    def model(self, camera_azimuth, camera_zenith, f, sun_azimuth, sun_zenith, x, y):
+    def model(self, camera_azimuth:float, camera_zenith:float, f:float, sun_azimuth:float, sun_zenith:float, x:np.ndarray, y:np.ndarray) -> np.ndarray:
         u, v = self.convertor.xy_to_uv(x, y)
         theta = self.convertor.point_zenith(u, v, camera_zenith, f)
         return self.model_raw(theta)
     
     
-    def generate_image(self, camera_zenith, f):
+    def generate_image(self, camera_zenith:float, f:float):
         x, y = np.ones([self.convertor.W, self.convertor.H]).nonzero()
         r = self.model(None, camera_zenith, f, None, None, x, y)
         img = np.zeros([self.convertor.H, self.convertor.W])

@@ -1,41 +1,5 @@
 version: "3.8"
 services:
-  arizona-perez:
-    build: .
-    volumes:
-      - .:/usr/bakalarka
-    stdin_open: true
-    tty: true
-    command: >
-      python3 main.py 
-        -I ../webcamCalibration/images/gradient 
-        -J ../webcamCalibration/images/clearDay 
-        -m ../webcamCalibration/skyMask/mask.jpg 
-        -n 1000 -W 720 -H 540 -f0 500 
-        -df matlab-flat
-        -mJ perez
-        -min 10
-        -max 240
-    working_dir: /usr/bakalarka/src
-
-  arizona-prague:
-    build: .
-    volumes:
-      - .:/usr/bakalarka
-    stdin_open: true
-    tty: true
-    command: >
-      python3 main.py 
-        -I ../webcamCalibration/images/gradient 
-        -J ../webcamCalibration/images/clearDay 
-        -m ../webcamCalibration/skyMask/mask.jpg 
-        -n 1000 -W 720 -H 540 -f0 500 
-        -df matlab-flat
-        -mJ prague
-        -min 10
-        -max 240
-    working_dir: /usr/bakalarka/src
-
   chmu-perez:
     build: .
     volumes:

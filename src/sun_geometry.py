@@ -1,167 +1,165 @@
 import numpy as np
 from numpy import sin, cos, pi
-from sky_models import PragueSkyModel
+#from sky_models import PragueSkyModel
 import matplotlib.pyplot as plt
 import cv2
+import json
 from coordinates import CoordinateConvertor
 from scipy.optimize import least_squares
 from sun_position_calculator import SunPositionCalculator
 
 
-def _P(x, y, z, u, v):
-    assert len(x) == len(y) == len(z) == len(u) == len(v) == 4
-    rows = []
-    for i in range(len(x)):
-        rows.append([x[i], y[i], 0, 0, 0, -u[i]*x[i], -u[i]*y[i], -u[i]*z[i]])
-        rows.append([0, 0, x[i], y[i], z[i], -v[i]*x[i], -v[i]*y[i], -v[i]*z[i]])
-    return np.array(rows)
+
+class PerspectiveCalibrator:
+    """Given 4 points in 3D space and their projections on the image plane, calculates camera's parameters.
+    """
+    def __init__(self, image_width, image_height) -> None:
+        self.W = image_width
+        self.H = image_height
+        pass
+
+    def _P(self, x:list[float], y:list[float], z:list[float], u:list[float], v:list[float]) -> np.ndarray:
+        """From 4 points in 3D space and their projections on the image plane calculates the projection matrix P.
+        Args:
+            x (list[float]): x coordinates of the points in 3D space
+            y (list[float]): y coordinates of the points in 3D space
+            z (list[float]): z coordinates of the points in 3D space
+            u (list[float]): x coordinates of the points on the image plane, with origin in the center of the image.
+            v (list[float]): y coordinates of the points on the image plane, with origin in the center of the image.
+
+        Returns:
+            np.ndarray: Projection matrix P with shape 8x8
+        """
+        assert len(x) == len(y) == len(z) == len(u) == len(v) == 4
+        rows = []
+        for i in range(len(x)):
+            rows.append([x[i], y[i], 0, 0, 0, -u[i]*x[i], -u[i]*y[i], -u[i]*z[i]])
+            rows.append([0, 0, x[i], y[i], z[i], -v[i]*x[i], -v[i]*y[i], -v[i]*z[i]])
+        return np.array(rows)
 
 
-def _m(P):
-    _, s, Vt = np.linalg.svd(P, full_matrices=True)
-    min_singular_index = np.argmin(s)
-    x_min = Vt[min_singular_index, :]
-    return x_min
+    def _m(self, P:np.ndarray) -> np.ndarray:
+        """Using Singular Value Decomposition of the projection matrix P calculates the vector m from which it is possible to calculate cameras intrinsic and extrinsic parameters.
+
+        Args:
+            P (np.ndarray): Projection 8x8 matrix from space to image plane
+
+        Returns:
+            np.ndarray: vector mfrom which it is possible to calculate cameras intrinsic and extrinsic parameters
+        """
+        _, s, Vt = np.linalg.svd(P, full_matrices=True)
+        min_singular_index = np.argmin(s)
+        x_min = Vt[min_singular_index, :]
+        return x_min
 
 
-def _raw_calib(m):
-    c = np.sqrt(m[-3]**2 + m[-2]**2 + m[-1]**2)
-    m = m / c
-    theta_c = np.arctan(np.sqrt(m[-3]**2 + m[-2]**2) / m[-1])
-    f = np.sqrt(m[0]**2 + m[1]**2)
-    phi_c = np.arctan2(m[0], (-m[1]))
-    phi_c %= 2*pi
-    return theta_c, phi_c, f
+    def _raw_calib(self, m:np.ndarray) -> tuple[float, float, float]:
+        """From vector m calculates cameras intrinsic and extrinsic parameters.
+
+        Args:
+            m (np.ndarray): solves least squares of projection matrix P from space to image plane
+
+        Returns:
+            tuple[float, float, float]: camera zenith angle, azimuth angle and focal length
+        """
+        c = np.sqrt(m[-3]**2 + m[-2]**2 + m[-1]**2)
+        m = m / c
+        theta_c = np.arctan(np.sqrt(m[-3]**2 + m[-2]**2) / m[-1])
+        f = np.sqrt(m[0]**2 + m[1]**2)
+        phi_c = np.arctan2(m[0], (-m[1]))
+        phi_c %= 2*pi
+        return theta_c, phi_c, f
 
 
-def _finetuned_calib(sun_thetas, sun_phis, xs, ys):
-    convertor = CoordinateConvertor()
-    x, y, z = convertor.spherical_to_cartesian(sun_thetas, sun_phis)
-    u, v = convertor.xy_to_uv(xs, ys)
+    def _finetuned_calib(self, sun_thetas: list[float], sun_phis: list[float], xs:list[float], ys:list[float]) -> tuple[float, float, float]:
+        """First calculates camera parameters using linear least squares and than finetunes them using non-linear least squares.
+        Args:
+            sun_thetas (list[float]): list of 4 sun zenith angles
+            sun_phis (list[float]): list of 4 sun azimuth angles
+            xs (list[float]): list of 4 x coordinates of the suns projections on the image plane
+            ys (list[float]): list of 4 y coordinates of the suns projections on the image plane
 
-    def objective_function(params):
-        theta_c, phi_c, f = params
-        m1 = np.array([f*sin(phi_c), -f*cos(phi_c), 0])
-        m2 = np.array([-f*cos(phi_c)*cos(theta_c), -f*sin(phi_c)*cos(theta_c), f*sin(theta_c)])
-        m3 = np.array([cos(phi_c)*sin(theta_c), sin(phi_c)*sin(theta_c), cos(theta_c)])
-        residuals = []
-        for i in range(len(sun_thetas)):
-            s = np.array([x[i], y[i], z[i]])
-            residuals.append(m1@s - u[i]*m3@s)
-            residuals.append(m2@s - v[i]*m3@s)
-        return residuals
+        Returns:
+            tuple[float, float, float]: camera zenith angle theta_c, azimuth angle phi_c and focal length f_c 
+        """
+        convertor = CoordinateConvertor(self.W, self.H)
+        x, y, z = convertor.spherical_to_cartesian(sun_thetas, sun_phis)
+        u, v = convertor.xy_to_uv(xs, ys)
 
-    x0 = _raw_calib(_m(_P(x, y, z, u, v)))
-    x = least_squares(objective_function, x0).x
-    return x
+        def objective_function(params):
+            theta_c, phi_c, f = params
+            m1 = np.array([f*sin(phi_c), -f*cos(phi_c), 0])
+            m2 = np.array([-f*cos(phi_c)*cos(theta_c), -f*sin(phi_c)*cos(theta_c), f*sin(theta_c)])
+            m3 = np.array([cos(phi_c)*sin(theta_c), sin(phi_c)*sin(theta_c), cos(theta_c)])
+            residuals = []
+            for i in range(len(sun_thetas)):
+                s = np.array([x[i], y[i], z[i]])
+                residuals.append(m1@s + u[i]*m3@s)
+                residuals.append(m2@s - v[i]*m3@s)
+            return residuals
 
-
-def calibrate(sun_thetas, sun_phis, xs, ys):
-    thetas_calib, phis_calib, fs_calib = [], [], []
-    R = 100
-    max_tries = 10_000_000
-    num_tries = 0
-    counter = 0
-    while counter < 2 and num_tries < max_tries:
-        num_tries += 1
-        xs_moved = xs + np.random.randint(-R, R + 1, 4)
-        ys_moved = ys + np.random.randint(-R, R + 1, 4)
-        theta_calib, phi_calib, f_calib = _finetuned_calib(sun_thetas, sun_phis, xs_moved, ys_moved)
-        if 0 < theta_calib < pi/2 and 400 < f_calib < 8000:
-            print(num_tries, xs_moved, ys_moved, 'calib theta, phi, f:',
-                  np.rad2deg(theta_calib), np.rad2deg(phi_calib), f_calib)
-            counter += 1
-            thetas_calib.append(theta_calib)
-            phis_calib.append(phi_calib)
-            fs_calib.append(f_calib)
-            if counter == 2:
-                return np.mean(thetas_calib), np.mean(phis_calib), np.mean(fs_calib)
-    if num_tries == max_tries:
-        print('max tries reached')
-        return thetas_calib, phis_calib, fs_calib
-    thetas_calib = np.array(thetas_calib)
-    phis_calib = np.array(phis_calib)
-    fs_calib = np.array(fs_calib)
-    print('counter', counter)
-    return np.mean(thetas_calib), np.mean(phis_calib), np.mean(fs_calib)
+        x0 = self._raw_calib(self._m(self._P(x, y, z, u, v)))
+        x = least_squares(objective_function, x0).x
+        return x0, x
 
 
-def show_calibration(sun_thetas, sun_phis, xs, ys, theta_calib, phi_calib, f_calib):
-    model = PragueSkyModel()
-    imgs = [model.generate_image(phi_calib, theta_calib, f_calib, phi_s, theta_s)
-            for theta_s, phi_s in zip(sun_thetas, sun_phis)]
-    for img, x, y in zip(imgs, xs, ys):
-        img = cv2.circle(img, (int(x), int(y)), 4, 30, 2)
+    def calibrate(self, sun_thetas:list[float], sun_phis:list[float], xs:list[float], ys:list[float]) -> tuple[float, float, float]:
+        """From suns zenith and azimuth angles and their projections on the image plane calculates camera zenith angle, azimuth angle and focal length.
 
-    _, ax = plt.subplots(1, 4)
-    ax[0].imshow(imgs[0])
-    ax[1].imshow(imgs[1])
-    ax[2].imshow(imgs[2])
-    ax[3].imshow(imgs[3])
+        Args:
+            sun_thetas (list[float]): 4 sun zenith angles in radians
+            sun_phis (list[float]): 4 sun azimuth angles in radians
+            xs (list[float]): 4 sun x coordinates on the image plane
+            ys (list[float]): 4 sun y coordinates on the image plane
 
-    plt.show()
+        Returns:
+            tuple[float, float, float]: camera zenith angle theta_c and azimuth angle phi_c in radians and focal length f_c in pixels
+        """
+
+        # TODO: remove default and hardcoded values
+
+        thetas_calib, phis_calib, fs_calib = [], [], []
+        R = 100
+        max_tries = 10_000_000
+        num_tries = 0
+        counter = 0
+        while counter < 2 and num_tries < max_tries:
+            num_tries += 1
+            xs_moved = xs + np.random.randint(-R, R + 1, 4)
+            ys_moved = ys + np.random.randint(-R, R + 1, 4)
+            x0, (theta_calib, phi_calib, f_calib) = self._finetuned_calib(sun_thetas, sun_phis, xs_moved, ys_moved)
+            if num_tries % 100 == 0:
+                ...
+                #print('num_tries', num_tries, x0, theta_calib, phi_calib, f_calib)
+            if 0 < theta_calib < pi/2 and 100 < f_calib < 8000: 
+                print(num_tries, xs_moved, ys_moved, 'calib theta, phi, f:',
+                    np.rad2deg(theta_calib), np.rad2deg(phi_calib), f_calib)
+                counter += 1
+                thetas_calib.append(theta_calib)
+                phis_calib.append(phi_calib)
+                fs_calib.append(f_calib)
+                if counter == 2:
+                    return np.mean(thetas_calib), np.mean(phis_calib), np.mean(fs_calib)
+        if num_tries == max_tries:
+            print('max tries reached')
+            return thetas_calib, phis_calib, fs_calib
+        thetas_calib = np.array(thetas_calib)
+        phis_calib = np.array(phis_calib)
+        fs_calib = np.array(fs_calib)
+        print('counter', counter)
+        return np.mean(thetas_calib), np.mean(phis_calib), np.mean(fs_calib)
+
 
 
 if __name__ == '__main__':
-    sun_calc = SunPositionCalculator()
-    np.random.seed(42)
-    data = {
-        'belotin': {
-            'filenames': ['/projects/SkyGAN/webcams/chmi.cz/sky_webcams/belotin/20210326/0605.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/belotin/20210326/0630.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/belotin/20210326/0700.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/belotin/20210822/0645.jpg'],
-            'xs': [622, 770, 949, 320],
-            'ys': [570, 450, 296, 420],
-        },
-        'dukovany': {
-            'filenames': ['/projects/SkyGAN/webcams/chmi.cz/sky_webcams/dukovany/20220118/0825.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/dukovany/20221006/0805.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/dukovany/20221006/0855.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/dukovany/20230120/0910.jpg'],
-            'xs': [911, 316, 620, 1160],
-            'ys': [557, 388, 212, 340]
-        },
-        'brno': {
-            'filenames': ['/projects/SkyGAN/webcams/chmi.cz/sky_webcams/brno/20210625/0630.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/brno/20210625/0530.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/brno/20210625/0730.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/brno/20210625/0700.jpg'],
-            'xs': [944, 640, 1244, 1090],
-            'ys': [513, 760, 234, 780]
-        },
-        'ceske_budejovice': {
-            'filenames': ['/projects/SkyGAN/webcams/chmi.cz/sky_webcams/ceske_budejovice/20210405/1630.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/ceske_budejovice/20210820/1835.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/ceske_budejovice/20210820/1820.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/ceske_budejovice/20210820/1850.jpg'],
-            'xs': [400, 1184, 1113, 1280],
-            'ys': [137, 586, 508, 650]
-        },
-        'holesov': {
-            'filenames': ['/projects/SkyGAN/webcams/chmi.cz/sky_webcams/holesov/20210905/1915.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/holesov/20210905/1615.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/holesov/20210905/1800.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/holesov/20210905/1700.jpg', ],
-            'xs': [1518, 490, 1077, 748, ],
-            'ys': [981, 150, 648, 374, ]
-        },
-        'nedvezi': {
-            'filenames': ['/projects/SkyGAN/webcams/chmi.cz/sky_webcams/nedvezi/20210509/0530.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/nedvezi/20210509/0545.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/nedvezi/20210509/0600.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/nedvezi/20210509/0625.jpg', ],
-            'xs': [369, 450, 535, 664, ],
-            'ys': [686, 635, 570, 450, ]
-        },
-        'polom': {
-            'filenames': ['/projects/SkyGAN/webcams/chmi.cz/sky_webcams/polom/20210531/2050.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/polom/20210531/2040.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/polom/20210531/2030.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/polom/20210531/2020.jpg', ],
-            'xs': [645, 583, 520, 455, ],
-            'ys': [678, 638, 600, 555, ]
-        },
-        'pribyslav': {
-            'filenames': ['/projects/SkyGAN/webcams/chmi.cz/sky_webcams/pribyslav/20210330/1845.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/pribyslav/20210330/1615.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/pribyslav/20210330/1720.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/pribyslav/20210330/1800.jpg', ],
-            'xs': [1415, 500, 900, 1130, ],
-            'ys': [824, 186, 453, 630, ]
-        },
-        'primda': {
-            'filenames': ['/projects/SkyGAN/webcams/chmi.cz/sky_webcams/primda/20210602/0545.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/primda/20210602/0550.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/primda/20210602/0555.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/primda/20210602/0600.jpg', ],
-            'xs': [436, 464, 495, 520, ],
-            'ys': [514, 490, 475, 450, ]
-        },
-        'olomouc': {
-            'filenames': ['/projects/SkyGAN/webcams/chmi.cz/sky_webcams/olomouc/20220107/1125.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/olomouc/20220107/1045.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/olomouc/20220107/0935.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/olomouc/20220107/1015.jpg', ],
-            'xs': [1068, 810, 345, 615, ],
-            'ys': [421, 460, 609, 537, ]
-        },
-        'temelin': {
-            'filenames': ['/projects/SkyGAN/webcams/chmi.cz/sky_webcams/temelin/20220224/0820.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/temelin/20220224/0930.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/temelin/20220224/0845.jpg', '/projects/SkyGAN/webcams/chmi.cz/sky_webcams/temelin/20220224/0910.jpg', ],
-            'xs': [208, 686, 384, 560, ],
-            'ys': [511, 215, 396, 308, ]
-        }
-    }
+    np.random.seed(0)
+    sun_calc = SunPositionCalculator('../data/webcams.json')
+    
+    
+    data_json = json.load(open('../data/p4p.json'))
+    data_W, data_H, data =data_json['W'], data_json['H'], data_json['locations']
+    print(data_W, data_H, data)
+    perspective_calib = PerspectiveCalibrator(data_W, data_H)
 
     def run():
         '''
@@ -235,18 +233,15 @@ if __name__ == '__main__':
         sun zeniths: [1.3547028828875933, 1.1985708307555536, 1.295297368186787, 1.2397392236387879]
         theta, phi, f = 1.4220596645194596 2.4789882569454122 1607.9499169483042
         '''
-
-        sun_calibrations = {
-
-        }
+        sun_calibrations = {}
         for location in data:
-            if location == 'belotin':
+            if location in [ 'belotin', 'brno']:
                 continue
             print(location)
             solar_data = [sun_calc.sun_position(f) for f in data[location]['filenames']]
-            data[location]['sun_thetas'] = [np.deg2rad(x['sunZenith']) for x in solar_data]
-            data[location]['sun_phis'] = [np.deg2rad(x['sunAzimuth']) for x in solar_data]
-            theta, phi, f = calibrate(data[location]['sun_thetas'], data[location]['sun_phis'],
+            data[location]['sun_thetas'] = [x['sunZenith'] for x in solar_data]
+            data[location]['sun_phis'] = [x['sunAzimuth'] for x in solar_data]
+            theta, phi, f = perspective_calib.calibrate(data[location]['sun_thetas'], data[location]['sun_phis'],
                                       np.array(data[location]['xs']), np.array(data[location]['ys']))
             print('sun azimuths:', data[location]['sun_phis'])
             print('sun zeniths:', data[location]['sun_thetas'])
@@ -259,6 +254,7 @@ if __name__ == '__main__':
 
         print(sun_calibrations)
 
+    run()
     sun_calibrations = {'dukovany': {'theta': 1.4710038110135613, 'phi': 2.330354043400501, 'f': 1488.7844647180918},
                         'brno': {'theta': 1.1833720772413656, 'phi': 1.2933783429191128, 'f': 1458.200979566561},
                         'ceske_budejovice': {'theta': 1.5005772575612908, 'phi': 4.715353977779227, 'f': 1547.703516624164},
@@ -270,4 +266,4 @@ if __name__ == '__main__':
                         'olomouc': {'theta': 1.389273629807438, 'phi': 2.863550646590424, 'f': 1371.6869611268887},
                         'temelin': {'theta': 1.4220596645194596, 'phi': 2.4789882569454122, 'f': 1607.9499169483042}}
 
-    print(list(sun_calibrations.keys()))
+    #print(list(sun_calibrations.keys()))

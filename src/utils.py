@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image
 from coordinates import CoordinateConvertor
 import json
-
+import jsonlines
 
 def iterable_argument_cache(func):
     """Cache decorator for functions with argument being a list (mostly of strings).
@@ -39,14 +39,24 @@ def read_image_greyscale(path: str, width:int, height:int) -> np.ndarray:
                 
 def latex_table():
 
+    names = ['Brno', 'České Budějovice', 'Dukovany', 'Holešov', 'Nedvězí', 'Olomouc', 'Polom', 'Přibyslav', 'Přimda', 'Temelín']
 
+    
+    def print_results_from_jsonlines(file_path1, file_path2, W, H):
+        convertor = CoordinateConvertor(W, H)
+        with jsonlines.open(file_path1) as reader1, jsonlines.open(file_path2) as reader2:
+            for document1, document2, i in zip(reader1, reader2, range(10)):
+                fov1 = np.rad2deg(convertor.f_to_fov(document1["f"]))%360
+                fov2 = np.rad2deg(convertor.f_to_fov(document2["f"]))%360
 
-    def print_results(results1, results2, W, H, input_radians):
-        
-        
-        
-        names = ['Brno', 'České Budějovice', 'Dukovany', 'Holešov', 'Nedvězí', 'Olomouc', 'Polom', 'Přibyslav', 'Přimda', 'Temelín']
+                print(f'{names[i]:<16}  & {document1["phi"]:.2f}\\textdegree  \t & {document1["theta"]:.2f}\\textdegree  \t & {fov1:.2f}\\textdegree   \t & {document2["phi"]:.2f}\\textdegree  \t & {document2["theta"]:.2f}\\textdegree  \t & {fov2:.2f}\\textdegree  \\\\ ')
 
+                
+        
+    
+    
+
+    def print_results_from_json(results1, results2, W, H, input_radians):
         convertor = CoordinateConvertor(W, H)
         for i, pos in enumerate(sorted(results1)):
             phi1, theta1 = results1[pos]["phi"], results1[pos]["theta"]
@@ -87,6 +97,8 @@ def latex_table():
     #print_results(p4p_results, 1600, 1200, True)
     #print_results(matlab_results, 720, 540, False)
     #print_results(perez_results, 720, 540, False)
-    print_results(matlab_results, matlab_small_results, 720, 540, False)
+    print_results_from_jsonlines('chmu-perez-log.jsonl','chmu-perez-clean-log.jsonl', 720, 540)
 
-#latex_table()
+
+if __name__ == "__main__":
+    latex_table()

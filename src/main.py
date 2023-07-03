@@ -23,7 +23,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     np.random.seed(0)
     
-    I_model = PragueSkyModel(args.W, args.H)
+    
+    I_model = PragueSkyModel(args.W, args.H) if args.model_I == 'prague' else PerezSkyModel(args.W, args.H) if args.model_I == 'perez' else PerezAzimuthIndependentSkyModel(args.W, args.H)
     J_model = PragueSkyModel(args.W, args.H) if args.model_J == 'prague' else PerezSkyModel(args.W, args.H)
     
     if args.dataset_format == 'date-time':

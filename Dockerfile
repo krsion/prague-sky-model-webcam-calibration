@@ -3,7 +3,7 @@ FROM ubuntu:latest as builder
 
 RUN apt-get update && apt-get install -y g++ python3 python3-pip python3-dev
 
-RUN pip install numpy scipy Pillow matplotlib pytz timezonefinder pysolar opencv-python-headless pybind11 h5py
+RUN pip install numpy scipy Pillow matplotlib pytz timezonefinder pysolar opencv-python-headless pybind11 h5py jsonlines
 
 WORKDIR /usr/bakalarka
 

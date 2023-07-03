@@ -10,7 +10,7 @@ class ArizonaCalibration:
     """
     Optimization of focal length, zenith and azimuth angle on a flat dataset.
     """
-    def __init__(self, mask_path:str, W:int, H:int, px_num:int):
+    def __init__(self, mask_path:str, W:int, H:int, px_num:int, sky_min_value:int, sky_max_value:int):
         """Initialize ArizonaCalibration.
 
         Args:
@@ -18,12 +18,15 @@ class ArizonaCalibration:
             W (int): Width of images in dataset. Will be resized to this value.
             H (int): Height of images in dataset. Will be resized to this value.
             px_num (int): Number of pixels in each image to be used for calibration.
+            sky_min_value(int): Pixels with lower value will be ignored for calibration.
+            sky_max_value(int): Pixels with higher value will be ignored for calibration.
         """
-        mask = read_image_greyscale(mask_path, W, H)
-        self.y_sky, self.x_sky = (mask == 255).nonzero()
+        self.mask = read_image_greyscale(mask_path, W, H)
         self.W = W
         self.H = H
         self.px_num = px_num
+        self.sky_min_value = sky_min_value
+        self.sky_max_value = sky_max_value
                 
     def demo(self, I_path:str, J_path:str, f0:int, I_model:SkyModel, J_model:SkyModel) -> dict[str, float, float]:
         """Run calibration on dataset I and J. Calibration of azimuth angle is done for each of the four cardinal directions.
@@ -60,7 +63,9 @@ class ArizonaCalibration:
             tuple[float, float]: focal length in pixels and zenith angle in radians.
         """
         truth, xs, ys, _, _ = self.process_images(self.get_image_paths(images_path))
-        theta0 = np.pi/2 + np.arctan2(self.H/2-np.max(self.y_sky), f0)
+        y_sky, _ = (self.mask == 255).nonzero()
+
+        theta0 = np.pi/2 + np.arctan2(self.H/2-np.max(y_sky), f0)
         x0 = np.array([f0, theta0, *[1]*len(truth)])
         result = least_squares(self.objective_f_theta, x0, method='lm', args=(model, truth, xs, ys))
         f, theta = result.x[0], result.x[1]
@@ -181,11 +186,16 @@ class ArizonaCalibration:
         
         for image_path in image_paths:
             photo = read_image_greyscale(image_path, self.W, self.H)
-            rand_idx = np.random.choice(self.x_sky.size, self.px_num)
-            x_sky_rand = self.x_sky[rand_idx]
-            y_sky_rand = self.y_sky[rand_idx]
+            
+            y_sky, x_sky = np.argwhere((self.mask == 255) & (photo < self.sky_max_value) & (photo > self.sky_min_value)).T
+            rand_idx = np.random.choice(x_sky.size, self.px_num)
+
+            x_sky_rand = x_sky[rand_idx]
+            y_sky_rand = y_sky[rand_idx]
             xs.append(x_sky_rand)
             ys.append(y_sky_rand)
+            
+            
             truth.append(photo[y_sky_rand, x_sky_rand]/256)
             
             phi_s, theta_s = self.load_solar(image_path)           
@@ -199,7 +209,7 @@ class ArizonaCalibration:
 class CHMUCalibration(ArizonaCalibration):
     """Child class of ArizonaCalibration. It is used for CHMU dataset format. Sun positions are calculated from image path. e.g. I/brno/20220531/1345.jpg
     """
-    def __init__(self, mask_path:str, W:int, H:int, px_num:int):
+    def __init__(self, mask_path:str, W:int, H:int, px_num:int, sky_min_value:int, sky_max_value:int, webcams_info_filename:str):
         """Creates instance of CHMUCalibration with preset mask, image size and number of pixels used for calibration.
 
         Args:
@@ -207,9 +217,12 @@ class CHMUCalibration(ArizonaCalibration):
             W (int): Width of images
             H (int): Height of images
             px_num (int): Number of pixels used for calibration
+            sky_min_value(int): Pixels with lower value will be ignored for calibration.
+            sky_max_value(int): Pixels with higher value will be ignored for calibration.
+            webcams_info_filename (str): Path to JSON file with webcams info. It is used for sun position calculation.
         """
-        self.solar_calc = SunPositionCalculator('../data/webcams.json')
-        super().__init__(mask_path, W, H, px_num)
+        self.solar_calc = SunPositionCalculator(webcams_info_filename)
+        super().__init__(mask_path, W, H, px_num, sky_min_value, sky_max_value)
         
     def load_solar(self, image_path):
         """Calculates sun azimuth and zenith angle from image path. Overriding this method is useful when you want to use different dataset format.
@@ -236,10 +249,3 @@ class CHMUCalibration(ArizonaCalibration):
             for filename in os.listdir(os.path.join(directory, day)):
                 if filename.endswith('.jpg'):
                     yield os.path.join(directory, day, filename)
-
-
-if __name__ == '__main__':
-    np.random.seed(0)
-    PX_NUM, F0, WIDTH, HEIGHT = 1000, 500, 720, 540
-    #ArizonaCalibration('../webcamCalibration/skyMask/mask.jpg', WIDTH, HEIGHT, PX_NUM).demo('../webcamCalibration/images/gradient', '../webcamCalibration/images/clearDay', F0)
-    print(CHMUCalibration('../data/sky-masks/ceske_budejovice.jpg', WIDTH, HEIGHT, PX_NUM).demo('../data/I/ceske_budejovice', '../data/J/ceske_budejovice', F0))

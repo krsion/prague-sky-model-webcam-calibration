@@ -14,6 +14,8 @@ services:
         -n 1000 -W 720 -H 540 -f0 500 
         -df matlab-flat
         -mJ perez
+        -min 10
+        -max 240
     working_dir: /usr/bakalarka/src
 
   arizona-prague:
@@ -30,6 +32,8 @@ services:
         -n 1000 -W 720 -H 540 -f0 500 
         -df matlab-flat
         -mJ prague
+        -min 10
+        -max 240
     working_dir: /usr/bakalarka/src
 
   chmu-perez:
@@ -71,6 +75,48 @@ services:
         ./chmucalib.sh temelin prague >> chmu-prague-log.txt
         ./chmucalib.sh brno prague >> chmu-prague-log.txt
         ./chmucalib.sh nedvezi prague >> chmu-prague-log.txt
+      "
+    working_dir: /usr/bakalarka/src
+
+  chmu-perez-clean:
+    build: .
+    volumes:
+      - .:/usr/bakalarka
+    stdin_open: true
+    tty: true
+    command: >
+      bash -c "
+        ./chmucalib-clean.sh ceske_budejovice perez >> chmu-perez-clean-log.txt
+        ./chmucalib-clean.sh dukovany perez >> chmu-perez-clean-log.txt
+        ./chmucalib-clean.sh holesov perez >> chmu-perez-clean-log.txt
+        ./chmucalib-clean.sh olomouc perez >> chmu-perez-clean-log.txt
+        ./chmucalib-clean.sh pribyslav perez >> chmu-perez-clean-log.txt
+        ./chmucalib-clean.sh polom perez >> chmu-perez-clean-log.txt
+        ./chmucalib-clean.sh primda perez >> chmu-perez-clean-log.txt
+        ./chmucalib-clean.sh temelin perez >> chmu-perez-clean-log.txt
+        ./chmucalib-clean.sh brno perez >> chmu-perez-clean-log.txt
+        ./chmucalib-clean.sh nedvezi perez >> chmu-perez-clean-log.txt
+      "
+    working_dir: /usr/bakalarka/src
+
+  chmu-prague-clean:
+    build: .
+    volumes:
+      - .:/usr/bakalarka
+    stdin_open: true
+    tty: true
+    command: >
+      bash -c "
+        ./chmucalib-clean.sh ceske_budejovice prague >> chmu-prague-clean-log.txt
+        ./chmucalib-clean.sh dukovany prague >> chmu-prague-clean-log.txt
+        ./chmucalib-clean.sh holesov prague >> chmu-prague-clean-log.txt
+        ./chmucalib-clean.sh olomouc prague >> chmu-prague-clean-log.txt
+        ./chmucalib-clean.sh pribyslav prague >> chmu-prague-clean-log.txt
+        ./chmucalib-clean.sh polom prague >> chmu-prague-clean-log.txt
+        ./chmucalib-clean.sh primda prague >> chmu-prague-clean-log.txt
+        ./chmucalib-clean.sh temelin prague >> chmu-prague-clean-log.txt
+        ./chmucalib-clean.sh brno prague >> chmu-prague-clean-log.txt
+        ./chmucalib-clean.sh nedvezi prague >> chmu-prague-clean-log.txt
       "
     working_dir: /usr/bakalarka/src
 

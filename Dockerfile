@@ -11,8 +11,9 @@ COPY . .
 
 WORKDIR /usr/bakalarka/src
 
-RUN c++ -O3 -shared -fPIC -std=c++17  -w $(python3-config --cflags --ldflags) $(python3 -m pybind11 --includes) sky_image_generator.cpp -o /usr/lib/python3/dist-packages/sky_image_generator$(python3-config --extension-suffix)
+RUN c++ -O3 -fopenmp -shared -fPIC -std=c++17  -w $(python3-config --cflags --ldflags) $(python3 -m pybind11 --includes) sky_image_generator.cpp -o /usr/lib/python3/dist-packages/sky_image_generator$(python3-config --extension-suffix)
 # -O3 ... maximum optimization
+# -fopenmp ... enable OpenMP (for parallelization)
 # -undefined dynamic_lookup ... MACOS ONLY ... allow undefined symbols (for pybind11)s
 # -shared -fPIC ... create a shared library
 # -std=c++17 ... use C++17

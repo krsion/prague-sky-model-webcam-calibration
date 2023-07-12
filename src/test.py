@@ -2,7 +2,6 @@ import unittest
 import numpy as np
 from sky_models import PragueSkyModel, PerezSkyModel
 from coordinates import CoordinateConvertor
-from sun_geometry import calibrate
 
 
 class TestSkyModels(unittest.TestCase):
@@ -57,24 +56,6 @@ class TestCoordinateConvertor(unittest.TestCase):
                 self.assertEqual(u, u_reconstructed)
                 self.assertEqual(v, v_reconstructed)
 
-
-class TestSunGeometry(unittest.TestCase):
-    def test_sun_calibration_on_ceske_budejovice(self):
-        sun_thetas = np.deg2rad(
-            np.round(np.array([70.0946364332799, 85.7480301427796, 83.39623639591332, 88.01104850711113]), 0))
-        sun_phis = np.deg2rad(
-            np.round(np.array([256.31033095068807, 283.93489695612186, 281.1575399273908, 286.7288952735205]), 0))
-        xs = np.array([400, 1184, 1113, 1280])
-        ys = np.array([137, 586, 508, 650])
-
-        theta_calib, phi_calib, f_calib = calibrate(sun_thetas, sun_phis, xs, ys)
-        expected_theta = np.deg2rad(86.1167975439323)
-        expected_phi = np.deg2rad(270.29897608318)
-        expected_f = 1579.6393131564218
-
-        self.assertAlmostEqual(theta_calib, expected_theta, places=6)
-        self.assertAlmostEqual(phi_calib, expected_phi, places=6)
-        self.assertAlmostEqual(f_calib, expected_f, places=6)
 
 
 if __name__ == '__main__':

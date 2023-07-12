@@ -1,8 +1,5 @@
 import numpy as np
 from numpy import sin, cos, pi
-#from sky_models import PragueSkyModel
-import matplotlib.pyplot as plt
-import cv2
 import json
 from coordinates import CoordinateConvertor
 from scipy.optimize import least_squares

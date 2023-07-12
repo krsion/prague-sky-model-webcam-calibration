@@ -38,9 +38,6 @@ def read_image_greyscale(path: str, width:int, height:int) -> np.ndarray:
 
                 
 def latex_table():
-
-
-
     names = ['Brno & 45\\textdegree', 'Č. Budějovice & 270\\textdegree', 'Dukovany & 135\\textdegree', 'Holešov & 270\\textdegree', 'Nedvězí & 180\\textdegree',
              'Olomouc & 180\\textdegree', 'Polom & 270\\textdegree', 'Přibyslav & 225\\textdegree', 'Přimda & 90\\textdegree', 'Temelín & 135\\textdegree']
 
@@ -54,43 +51,15 @@ def latex_table():
                 for document1, document2, i in zip(reader1, reader2, range(10)):
                     try:
                         fov1 = np.rad2deg(convertor.f_to_fov(document1["f"]))%360
-                        print(f'{names[i]:<16}  & {document1["phi"]:.2f}\\textdegree  \t & {document1["theta"]:.2f}\\textdegree  \t & {fov1:.2f}\\textdegree', end='')  
+                        print(f'{names[i]:<16}  & {document1["phi"]%360:.2f}\\textdegree  \t & {document1["theta"]:.2f}\\textdegree  \t & {fov1:.2f}\\textdegree', end='')  
                     except:
                         print(f"{names[i]:<16} &&&", end='')
                     try:    
                         fov2 = np.rad2deg(convertor.f_to_fov(document2["f"]))%360
-                        print(f'\t & {document2["phi"]:.2f}\\textdegree  \t & {document2["theta"]:.2f}\\textdegree  \t & {fov2:.2f}\\textdegree  \\\\ ')
+                        print(f'\t & {document2["phi"]%360:.2f}\\textdegree  \t & {document2["theta"]:.2f}\\textdegree  \t & {fov2:.2f}\\textdegree  \\\\ ')
                     except:
                         print("&&& \\\\")
     
-    
-
-    def print_results_from_json(results1, results2, W, H, input_radians):
-        results = []
-        convertor = CoordinateConvertor(W, H)
-        for i, pos in enumerate(sorted(results1)):
-            phi1, theta1 = results1[pos]["phi"], results1[pos]["theta"]
-            if input_radians:
-                phi1, theta1 = np.rad2deg(phi1), np.rad2deg(theta1)
-            phi1, theta1 = phi1%360, theta1%360
-            fov1 = np.rad2deg(convertor.f_to_fov(results1[pos]["f"]))%360
-            
-            phi2, theta2 = results2[pos]["phi"], results2[pos]["theta"]
-            if input_radians:
-                phi2, theta2 = np.rad2deg(phi2), np.rad2deg(theta2)
-            phi2, theta2 = phi2%360, theta2%360
-            fov2 = np.rad2deg(convertor.f_to_fov(results2[pos]["f"]))%360
-            
-            results.append((names[i], phi1, theta1, fov1, phi2, theta2, fov2))
-            print(f'{names[i]:<15} \t & {phi1:.2f}\\textdegree  \t & {theta1:.2f}\\textdegree  \t & {fov1:.2f}\\textdegree   \t & {phi2:.2f}\\textdegree  \t & {theta2:.2f}\\textdegree  \t & {fov2:.2f}\\textdegree \\\\ ')
-        print()
-        return results
-    
-
-
-    def results_diff(results1, results2, W, H):
-        ...
-        
 
     p4p_results = {'dukovany': {'theta': 1.4710038110135613, 'phi': 2.330354043400501, 'f': 1488.7844647180918},
                             'brno': {'theta': 1.1833720772413656, 'phi': 1.2933783429191128, 'f': 1458.200979566561},
@@ -105,16 +74,9 @@ def latex_table():
                             }
 
 
-    #matlab_results = json.loads(open('../results/matlab-n1000w720h540f0500.json').read())
-    #matlab_small_results = json.loads(open('../results/matlab-small.json').read())
-    
 
-    #perez_results = json.loads(open('../results/python-n1000w720h540f0500.json').read())
-
-    #print_results(p4p_results, 1600, 1200, True)
-    #print_results(matlab_results, 720, 540, False)
-    #print_results(perez_results, 720, 540, False)
-    print_results_from_jsonlines('chmu-perez-log.txt','chmu-perez-clean-log.txt', 720, 540)
+    print_results_from_jsonlines('chmu-prague-log.jsonl','chmu-prague-clean-log.jsonl', 720, 540)
+    #print_results_from_jsonlines('../results/matlab-large-corrected.jsonl','../results/matlab-small-corrected.jsonl', 1280, 720)
 
 
 if __name__ == "__main__":

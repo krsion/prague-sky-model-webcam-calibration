@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 import warnings
 from coordinates import CoordinateConvertor
+from PIL import Image
 
 
 class SkyModel(ABC):
@@ -93,3 +94,25 @@ class PerezAzimuthIndependentSkyModel(SkyModel):
         img = np.zeros([self.convertor.H, self.convertor.W])
         img[y, x] = r
         return img
+    
+
+if __name__ == '__main__':
+    def save_img(model, phi, theta, f, sun_phi, sun_theta, image_name):
+        sky = model.generate_image(phi, theta, f, sun_phi, sun_theta)
+        sky[sky < 0] = 0
+        sky = sky / np.max(sky)*255
+        Image.fromarray(sky.astype(np.uint8)).save(image_name)
+        
+    sun_phi = 5.275306729916581 
+    sun_theta = np.deg2rad(60)
+    f = 600
+    f_calib = 1377
+    theta = np.deg2rad(70)
+    phi = sun_phi + 0.4
+    perez = PerezSkyModel(720, 540)
+    prague = PragueSkyModel(720, 540)
+    perez_ind = PerezAzimuthIndependentSkyModel(720, 540)
+    
+    save_img(prague, phi, theta, f, sun_phi, sun_theta, 'prague.png')
+
+    save_img(perez, phi, theta, f, sun_phi, sun_theta, 'perez.png')

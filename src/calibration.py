@@ -165,7 +165,7 @@ class ArizonaCalibration:
         if not os.path.exists(solar_path):
             return None, None
         mat_file = h5py.File(solar_path, 'r')            
-        return mat_file['sunAzimuth'][0][0], mat_file['sunZenith'][0][0]
+        return -mat_file['sunAzimuth'][0][0], mat_file['sunZenith'][0][0]
 
     @iterable_argument_cache
     def process_images(self, image_paths:list[str])->tuple[list[np.ndarray], list[np.ndarray], list[np.ndarray], list[float], list[float]]:

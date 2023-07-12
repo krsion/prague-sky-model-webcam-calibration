@@ -1,6 +1,6 @@
 function chmuCalibration(iPath, jPath)
 
-rng(42)
+rng(0)
 
 locations = {'brno','ceske_budejovice', 'dukovany', 'holesov', 'nedvezi', 'olomouc', 'polom', 'pribyslav', 'primda', 'temelin'};
 

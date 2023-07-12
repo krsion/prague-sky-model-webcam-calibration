@@ -69,13 +69,6 @@ def predict(image):
     return segmentation[0]
 
 
-'''
-for index, filename in enumerate(os.listdir('mask')):
-    segmentation = predict(x[index]).astype(np.uint8)[:, :, 0]
-    Image.fromarray(segmentation).save(os.path.join(result_folder, filename))
-'''
-
-
 def generate_skymasks():
     def predict(image):
         inputs = feature_extractor(images=[image], return_tensors='pt')

@@ -8,16 +8,16 @@ services:
     tty: true
     command: >
       bash -c "
-        ./chmucalib.sh brno perez >> chmu-perez-log.jsonl
-        ./chmucalib.sh ceske_budejovice perez >> chmu-perez-log.jsonl
-        ./chmucalib.sh dukovany perez >> chmu-perez-log.jsonl
-        ./chmucalib.sh holesov perez >> chmu-perez-log.jsonl
-        ./chmucalib.sh nedvezi perez >> chmu-perez-log.jsonl
-        ./chmucalib.sh olomouc perez >> chmu-perez-log.jsonl
-        ./chmucalib.sh polom perez >> chmu-perez-log.jsonl
-        ./chmucalib.sh pribyslav perez >> chmu-perez-log.jsonl
-        ./chmucalib.sh primda perez >> chmu-perez-log.jsonl
-        ./chmucalib.sh temelin perez >> chmu-perez-log.jsonl
+        ./chmucalib.sh brno perez >> ../results/chmu-perez-log.jsonl
+        ./chmucalib.sh ceske_budejovice perez >> ../results/chmu-perez-log.jsonl
+        ./chmucalib.sh dukovany perez >> ../results/chmu-perez-log.jsonl
+        ./chmucalib.sh holesov perez >> ../results/chmu-perez-log.jsonl
+        ./chmucalib.sh nedvezi perez >> ../results/chmu-perez-log.jsonl
+        ./chmucalib.sh olomouc perez >> ../results/chmu-perez-log.jsonl
+        ./chmucalib.sh polom perez >> ../results/chmu-perez-log.jsonl
+        ./chmucalib.sh pribyslav perez >> ../results/chmu-perez-log.jsonl
+        ./chmucalib.sh primda perez >> ../results/chmu-perez-log.jsonl
+        ./chmucalib.sh temelin perez >> ../results/chmu-perez-log.jsonl
       "
     working_dir: /usr/bakalarka/src
 
@@ -29,16 +29,16 @@ services:
     tty: true
     command: >
       bash -c "
-        ./chmucalib.sh brno prague >> chmu-prague-log.jsonl
-        ./chmucalib.sh ceske_budejovice prague >> chmu-prague-log.jsonl
-        ./chmucalib.sh dukovany prague >> chmu-prague-log.jsonl
-        ./chmucalib.sh holesov prague >> chmu-prague-log.jsonl
-        ./chmucalib.sh nedvezi prague >> chmu-prague-log.jsonl
-        ./chmucalib.sh olomouc prague >> chmu-prague-log.jsonl
-        ./chmucalib.sh polom prague >> chmu-prague-log.jsonl
-        ./chmucalib.sh pribyslav prague >> chmu-prague-log.jsonl
-        ./chmucalib.sh primda prague >> chmu-prague-log.jsonl
-        ./chmucalib.sh temelin prague >> chmu-prague-log.jsonl
+        ./chmucalib.sh brno prague >> ../results/chmu-prague-log.jsonl
+        ./chmucalib.sh ceske_budejovice prague >> ../results/chmu-prague-log.jsonl
+        ./chmucalib.sh dukovany prague >> ../results/chmu-prague-log.jsonl
+        ./chmucalib.sh holesov prague >> ../results/chmu-prague-log.jsonl
+        ./chmucalib.sh nedvezi prague >> ../results/chmu-prague-log.jsonl
+        ./chmucalib.sh olomouc prague >> ../results/chmu-prague-log.jsonl
+        ./chmucalib.sh polom prague >> ../results/chmu-prague-log.jsonl
+        ./chmucalib.sh pribyslav prague >> ../results/chmu-prague-log.jsonl
+        ./chmucalib.sh primda prague >> ../results/chmu-prague-log.jsonl
+        ./chmucalib.sh temelin prague >> ../results/chmu-prague-log.jsonl
       "
     working_dir: /usr/bakalarka/src
 
@@ -50,16 +50,16 @@ services:
     tty: true
     command: >
       bash -c "
-        ./chmucalib-clean.sh brno perez >> chmu-perez-clean-log.jsonl
-        ./chmucalib-clean.sh ceske_budejovice perez >> chmu-perez-clean-log.jsonl
-        ./chmucalib-clean.sh dukovany perez >> chmu-perez-clean-log.jsonl
-        ./chmucalib-clean.sh holesov perez >> chmu-perez-clean-log.jsonl
-        ./chmucalib-clean.sh nedvezi perez >> chmu-perez-clean-log.jsonl
-        ./chmucalib-clean.sh olomouc perez >> chmu-perez-clean-log.jsonl
-        ./chmucalib-clean.sh polom perez >> chmu-perez-clean-log.jsonl
-        ./chmucalib-clean.sh pribyslav perez >> chmu-perez-clean-log.jsonl
-        ./chmucalib-clean.sh primda perez >> chmu-perez-clean-log.jsonl
-        ./chmucalib-clean.sh temelin perez >> chmu-perez-clean-log.jsonl
+        ./chmucalib-clean.sh brno perez >> ../results/chmu-perez-clean-log.jsonl
+        ./chmucalib-clean.sh ceske_budejovice perez >> ../results/chmu-perez-clean-log.jsonl
+        ./chmucalib-clean.sh dukovany perez >> ../results/chmu-perez-clean-log.jsonl
+        ./chmucalib-clean.sh holesov perez >> ../results/chmu-perez-clean-log.jsonl
+        ./chmucalib-clean.sh nedvezi perez >> ../results/chmu-perez-clean-log.jsonl
+        ./chmucalib-clean.sh olomouc perez >> ../results/chmu-perez-clean-log.jsonl
+        ./chmucalib-clean.sh polom perez >> ../results/chmu-perez-clean-log.jsonl
+        ./chmucalib-clean.sh pribyslav perez >> ../results/chmu-perez-clean-log.jsonl
+        ./chmucalib-clean.sh primda perez >> ../results/chmu-perez-clean-log.jsonl
+        ./chmucalib-clean.sh temelin perez >> ../results/chmu-perez-clean-log.jsonl
       "
     working_dir: /usr/bakalarka/src
 
@@ -71,16 +71,16 @@ services:
     tty: true
     command: >
       bash -c "
-        ./chmucalib-clean.sh brno prague >> chmu-prague-clean-log.jsonl
-        ./chmucalib-clean.sh ceske_budejovice prague >> chmu-prague-clean-log.jsonl
-        ./chmucalib-clean.sh dukovany prague >> chmu-prague-clean-log.jsonl
-        ./chmucalib-clean.sh holesov prague >> chmu-prague-clean-log.jsonl
-        ./chmucalib-clean.sh nedvezi prague >> chmu-prague-clean-log.jsonl
-        ./chmucalib-clean.sh olomouc prague >> chmu-prague-clean-log.jsonl
-        ./chmucalib-clean.sh polom prague >> chmu-prague-clean-log.jsonl
-        ./chmucalib-clean.sh pribyslav prague >> chmu-prague-clean-log.jsonl
-        ./chmucalib-clean.sh primda prague >> chmu-prague-clean-log.jsonl
-        ./chmucalib-clean.sh temelin prague >> chmu-prague-clean-log.jsonl
+        ./chmucalib-clean.sh brno prague >> ../results/chmu-prague-clean-log.jsonl
+        ./chmucalib-clean.sh ceske_budejovice prague >> ../results/chmu-prague-clean-log.jsonl
+        ./chmucalib-clean.sh dukovany prague >> ../results/chmu-prague-clean-log.jsonl
+        ./chmucalib-clean.sh holesov prague >> ../results/chmu-prague-clean-log.jsonl
+        ./chmucalib-clean.sh nedvezi prague >> ../results/chmu-prague-clean-log.jsonl
+        ./chmucalib-clean.sh olomouc prague >> ../results/chmu-prague-clean-log.jsonl
+        ./chmucalib-clean.sh polom prague >> ../results/chmu-prague-clean-log.jsonl
+        ./chmucalib-clean.sh pribyslav prague >> ../results/chmu-prague-clean-log.jsonl
+        ./chmucalib-clean.sh primda prague >> ../results/chmu-prague-clean-log.jsonl
+        ./chmucalib-clean.sh temelin prague >> ../results/chmu-prague-clean-log.jsonl
       "
     working_dir: /usr/bakalarka/src
 

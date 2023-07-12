@@ -18,10 +18,10 @@ class CoordinateConvertor:
         self.H = H
 
     def xy_to_uv(self, x: int, y: int) -> tuple[int, int]:
-        return x-self.W//2, self.H//2 - y
+        return self.W//2-x, self.H//2 - y
 
     def uv_to_xy(self, u: int, v: int) -> tuple[int, int]:
-        return u-self.W//2, self.H//2 - v
+        return self.W//2-u, self.H//2 - v
 
     def point_zenith(self, u: int, v: int, camera_zenith: float, f: float):
         return np.arccos((v * np.sin(camera_zenith) + f * np.cos(camera_zenith)) /

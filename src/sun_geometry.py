@@ -94,7 +94,7 @@ class PerspectiveCalibrator:
             residuals = []
             for i in range(len(sun_thetas)):
                 s = np.array([x[i], y[i], z[i]])
-                residuals.append(m1@s + u[i]*m3@s)
+                residuals.append(m1@s - u[i]*m3@s)
                 residuals.append(m2@s - v[i]*m3@s)
             return residuals
 

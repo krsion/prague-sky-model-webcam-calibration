@@ -234,16 +234,12 @@ if __name__ == '__main__':
         for location in data:
             if location in [ 'belotin', 'brno']:
                 continue
-            print(location)
             solar_data = [sun_calc.sun_position(f) for f in data[location]['filenames']]
             data[location]['sun_thetas'] = [x['sunZenith'] for x in solar_data]
             data[location]['sun_phis'] = [x['sunAzimuth'] for x in solar_data]
             theta, phi, f = perspective_calib.calibrate(data[location]['sun_thetas'], data[location]['sun_phis'],
                                       np.array(data[location]['xs']), np.array(data[location]['ys']))
-            print('sun azimuths:', data[location]['sun_phis'])
-            print('sun zeniths:', data[location]['sun_thetas'])
-            print('theta, phi, f =', theta, phi, f)
-            print()
+            print(location, 'theta, phi, f =', theta, phi, f)
             sun_calibrations[location] = {}
             sun_calibrations[location]['theta'] = theta
             sun_calibrations[location]['phi'] = phi

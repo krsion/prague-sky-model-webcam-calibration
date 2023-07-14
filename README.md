@@ -28,3 +28,6 @@ Didn't just copy-paste the code for better maintainability.
 - SkyModelDataset.dat [Google Drive](https://drive.google.com/file/d/19K96jEQmmqCeg8yjgZxj2awQj62lI50p/view)
 - All images in folders `data` and `data-matlab` are originally produced by [CHMI](https://www.chmi.cz/) and processed by [KSVI MFF CUNI](https://ksvi.mff.cuni.cz/index.en.php)
 - Sky masks in `data/masks` were originally produced by Matěj Mrázek ([GitHub](https://github.com/Matezzzz/Image_outpainting/))
+
+## License
+Only files that are not 3rd party are under license BSD3. License is only for files by Ondrej Krsicka.

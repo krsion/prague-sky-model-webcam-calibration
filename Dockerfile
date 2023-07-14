@@ -1,9 +1,9 @@
 
-FROM ubuntu:latest as builder
+FROM ubuntu:latest 
 
 RUN apt-get update && apt-get install -y g++ python3 python3-pip python3-dev
 
-RUN pip install numpy scipy Pillow matplotlib pytz timezonefinder pysolar opencv-python-headless pybind11 h5py jsonlines
+RUN pip install numpy==1.25 scipy==1.11 Pillow==10.0 matplotlib==3.7 pytz==2023.3 timezonefinder==6.2 pysolar==0.10 opencv-python-headless==4.8.0.74 pybind11==2.10 h5py==3.9 jsonlines==3.1
 
 WORKDIR /usr/bakalarka
 

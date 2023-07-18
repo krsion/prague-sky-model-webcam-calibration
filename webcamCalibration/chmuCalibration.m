@@ -13,5 +13,5 @@ for i = 1:length(locations)
     skyMaskPath = strcat('../data-matlab/masks/', location, '.jpg');
 
     [focalLength, zenithAngle, azimuthAngle] = calibrate(imagesPath, gradientPath, clearDayPath, skyMaskPath);
-    fprintf('{"name": "%s", "f": %.2f , "theta": %.2f , "phi": %.2f }\n', location, focalLength, zenithAngle*180/pi, azimuthAngle*180/pi);
+    fprintf('{"name": "%s", "f": %.2f , "theta": %.2f , "phi": %.2f }\n', location, focalLength, zenithAngle*180/pi, mod(360-azimuthAngle*180/pi,360));
 end

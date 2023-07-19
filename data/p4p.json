@@ -20,26 +20,6 @@
                 420
             ]
         },
-        "dukovany": {
-            "filenames": [
-                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/dukovany/20220118/0825.jpg",
-                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/dukovany/20221006/0805.jpg",
-                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/dukovany/20221006/0855.jpg",
-                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/dukovany/20230120/0910.jpg"
-            ],
-            "xs": [
-                911,
-                316,
-                620,
-                1160
-            ],
-            "ys": [
-                557,
-                388,
-                212,
-                340
-            ]
-        },
         "brno": {
             "filenames": [
                 "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/brno/20210625/0630.jpg",
@@ -80,6 +60,26 @@
                 650
             ]
         },
+        "dukovany": {
+            "filenames": [
+                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/dukovany/20220118/0825.jpg",
+                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/dukovany/20221006/0805.jpg",
+                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/dukovany/20221006/0855.jpg",
+                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/dukovany/20230120/0910.jpg"
+            ],
+            "xs": [
+                911,
+                316,
+                620,
+                1160
+            ],
+            "ys": [
+                557,
+                388,
+                212,
+                340
+            ]
+        },
         "holesov": {
             "filenames": [
                 "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/holesov/20210905/1915.jpg",
@@ -118,6 +118,26 @@
                 635,
                 570,
                 450
+            ]
+        },
+        "olomouc": {
+            "filenames": [
+                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/olomouc/20220107/1125.jpg",
+                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/olomouc/20220107/1045.jpg",
+                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/olomouc/20220107/0935.jpg",
+                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/olomouc/20220107/1015.jpg"
+            ],
+            "xs": [
+                1068,
+                810,
+                345,
+                615
+            ],
+            "ys": [
+                421,
+                460,
+                609,
+                537
             ]
         },
         "polom": {
@@ -178,26 +198,6 @@
                 490,
                 475,
                 450
-            ]
-        },
-        "olomouc": {
-            "filenames": [
-                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/olomouc/20220107/1125.jpg",
-                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/olomouc/20220107/1045.jpg",
-                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/olomouc/20220107/0935.jpg",
-                "/projects/SkyGAN/webcams/chmi.cz/sky_webcams/olomouc/20220107/1015.jpg"
-            ],
-            "xs": [
-                1068,
-                810,
-                345,
-                615
-            ],
-            "ys": [
-                421,
-                460,
-                609,
-                537
             ]
         },
         "temelin": {

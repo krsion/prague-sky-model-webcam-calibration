@@ -1,7 +1,7 @@
 
 FROM ubuntu:latest 
 
-RUN apt-get update && apt-get install -y g++ python3 python3-pip python3-dev
+RUN apt-get update && apt-get install -y g++ python3 python3-pip python3-dev dos2unix
 
 RUN pip install numpy==1.25 scipy==1.11 Pillow==10.0 matplotlib==3.7 pytz==2023.3 timezonefinder==6.2 pysolar==0.10 opencv-python-headless==4.8.0.74 pybind11==2.10 h5py==3.9 jsonlines==3.1
 
@@ -22,3 +22,5 @@ RUN c++ -O3 -fopenmp -shared -fPIC -std=c++17  -w $(python3-config --cflags --ld
 # $(python3.10 -m pybind11 --includes) ... get the flags for compiling against pybind11
 # sky_image_generator.cpp ... the source file
 # -o sky_image_generator$(python3-config --extension-suffix) ... the output file
+
+RUN dos2unix chmucalib.sh & dos2unix chmucalib-clean.sh & chmod +x chmucalib.sh & chmod +x chmucalib-clean.sh
